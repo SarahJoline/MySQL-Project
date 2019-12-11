@@ -1,0 +1,25 @@
+{
+  "name": "MySQL-Project",
+  "version": "1.0.0",
+  "description": "",
+  "main": "bamazonCustomer.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SarahJoline/MySQL-Project.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/SarahJoline/MySQL-Project/issues"
+  },
+  "homepage": "https://github.com/SarahJoline/MySQL-Project#readme",
+  "dependencies": {
+    "gitignore": "^0.6.0",
+    "inquirer": "^7.0.0",
+    "mysql": "^2.17.1"
+  }
+}
