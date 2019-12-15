@@ -1,20 +1,16 @@
 const mysql = require("mysql");
 var inquirer = require("inquirer");
 
-var myItems = [];
-var selectedItem = [];
-
 const connection = mysql.createConnection({
   host: "localhost",
   port: 3306,
   user: "root",
-  password: "password",
+  password: "",
   database: "bamazon_db"
 });
 
 connection.connect(err => {
   if (err) throw err;
-  console.log("Connection set up! Woohoo!");
   seeAllProducts();
   connection.end();
 });
@@ -22,25 +18,24 @@ connection.connect(err => {
 const seeAllProducts = () => {
   connection.query("SELECT * FROM products", (err, res) => {
     if (err) throw err;
+    const table = res;
 
     for (var i = 0; i < res.length; i++) {
       var items = res[i];
-      myItems.push(items);
       console.log(
         "ID: " +
-          res[i].id +
+          items.id +
           "  Item: " +
-          res[i].product_name +
+          items.product_name +
           "  $" +
-          res[i].price
+          items.price
       );
     }
-    console.log(myItems);
-    selectID();
+    selectID(table);
   });
 };
 
-const selectID = () => {
+const selectID = table => {
   inquirer
     .prompt({
       type: "input",
@@ -49,16 +44,16 @@ const selectID = () => {
     })
     .then(res => {
       var ID = res.productID;
-      for (var i = 0; i < myItems.length; i++) {
-        if (ID == myItems[i].id) {
-          selectedItem.push(myItems[i]);
+      for (var i = 0; i < table.length; i++) {
+        if (ID == table[i].id) {
+          var myItem = table[i];
         }
       }
-      orderQuantity();
+      orderQuantity(ID, myItem);
     });
 };
 
-const orderQuantity = () => {
+const orderQuantity = (ID, myItem) => {
   inquirer
     .prompt({
       type: "input",
@@ -66,15 +61,27 @@ const orderQuantity = () => {
       name: "quantity"
     })
     .then(res => {
-      console.log(res.quantity);
-      //if I do it this way does it mean that I can't update the database?
+      let ammount = res.quantity;
+      if (ammount > myItem.stock_quantity) {
+        console.log("Not enough Items in stock");
+      } else {
+        var totalPrice = myItem.price * ammount;
+        console.log(`Checkout total is $${totalPrice}`);
+        let newStock = myItem.stock_quantity - ammount;
+        console.log(newStock);
+        updateStock(newStock, ID);
+      }
     });
 };
 
-//find the stock quantity that corresponds to the id#
-//if there are not enough in stock
-//console.log Not enough in stock
-//else
-//find the price of the item associated with the selected product ID.
-// multiply price by quanitity
-//update the database with the new quantity
+const updateStock = (newStock, ID) => {
+  connection.query("SELECT * FROM products WHERE id = " + ID, (err, result) => {
+    console.log(result);
+    connection.query(
+      "UPDATE products SET stock_quantity = stock_quantity " +
+        newStock +
+        " WHERE item_id = " +
+        ID
+    );
+  });
+};
